@@ -258,9 +258,399 @@
 
 \begin{frame}
 	\frametitle{A classe \msg}
+	Ao receber do \mhub um instância de \sensordata, está é convertida para uma instância de \msg, uma classe interna do \cddl.
+	Todos os dados publicados pelo \cddl são intâncias desta classe. Dentre seus atributos, destaca-se:
+	\begin{itemize}
+		\item \texttt{serviceName}
+
+		\item \texttt{serviceValue}
+
+		\item \texttt{accuracy}
+
+		\item \texttt{sourceLocationLatitude}
+
+		\item \texttt{sourceLocationLongitude}
+
+		\item \texttt{signal}
+	\end{itemize}
+	Toda instância de \msg gerada é automaticamente publicada em um \broker.
 \end{frame}
 
+\begin{frame}
+	\frametitle{Visão geral do \mhubcddl}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.70\linewidth]{img/general-vision-cddl.png}
+		\caption{Fonte: \cite{gomes:2017}}
+	\end{figure}
+\end{frame}
+
+
 \section{Solução proposta}
+
+
+\begin{frame}
+	\frametitle{Contexto}
+	Dado o fato que o \cddl somente envia à camada de aplicação dados referentes à leitura de dados, as seguintes implicações ocorrem no desenvolvimento de aplicações:
+	\begin{itemize}
+		\item incapacidade de gerenciar efetivamente recursos computacionais;
+
+		\item limitações no desenvolvimento de aplicações que não interagem com \smartobjs por meio de conexões.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Requisitos}
+	\begin{itemize}
+		\item notificação de eventos de descoberta, conexão e desconexão de \smartobjs para a camada de aplicação do \software;
+
+		\item separação dos fluxos de eventos, provendo uma \api que permita a aplicação registrar interesse em cada tipo de evento individualmente;
+
+		\item permitir que estes eventos possam estar acessíveis tanto para a aplicação que os gera, quanto para aplicações remotas que registrem interesse em interações de outros \smartphones com \smartobjs;
+
+		\item fornecer uma \api assíncrona para o recebimento de cada notificação dos eventos desejados.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Propagação dos eventos do \stwopa ao \cddl}
+	Foi realizada uma modificação no \stwopa do \mhub para que este publique os objetos \sensordata que representem eventos de descoberta, conexão e desconexão com \smartobjs.
+
+	\bigskip
+
+	A comunicação é realizada através de \eventbus.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Separação do fluxos de eventos}
+	Como todos os dados publicados pelo \cddl são do tipo \msg, decidiu-se utilizar uma estratégia diferente da tomada pelo \stwopa para representar diferentes tipos de eventos.
+
+	\bigskip
+
+	Adotou-se uma estratégia baseada em orientação a objetos, onde as seguintes classes que herdam \msg foram criadas:
+	\begin{itemize}
+		\item \objfoundmsg;
+		\item \objconnectedmsg;
+		\item \objdisconnectedmsg;
+		\item \sensordatamsg.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Definição da estrutura de tópicos}
+	Cada mensagem deve ser publicada em um tópico específico, de acordo com o tipo de evento que esta representa.
+
+	\bigskip
+
+	A estrutura de tópicos proposta para publicação de eventos de descoberta, conexão e desconexão segue o seguinte padrão:
+	\[
+		\underbrace{\bm{\mathsf{domain}}\vphantom{p}}_{\text{\textsf{identificador do \cddl}}}
+		\bm{/}
+		\underbrace{\bm{\mathsf{clientId}}\vphantom{p}}_{\text{\textsf{identificador do cliente}}}
+		\bm{/}
+		\underbrace{\bm{\mathsf{eventTopic}}}_{\text{\textsf{identificador do tipo de evento}}}
+	\]
+\end{frame}
+
+\begin{frame}
+	\frametitle{Definição da estrutura de tópicos}
+	Caso seja necesário receber notificações de eventos provinientes de outras aplicações, pode-se fazer uso dos caracteres coringa do \mqtt, como:
+	\texttt{domain/+/eventTopic}.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Diagrama de sequência}
+	\begin{figure}
+		\centering
+		\includegraphics[width=.85\linewidth]{img/solution-sequence.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Extensão da \api}
+	Foram adicionados novos métodos à interface \texttt{Subscriber} que permitem que a aplicação registre interesse nos novos eventos, são elas:
+	\begin{itemize}
+		\item \texttt{subscribeObjectFoundTopic()}:
+
+		\item \texttt{subscribeObjectConnectedTopic()}:
+
+		\item \texttt{subscribeObjectDisconnectedTopic()}:
+	\end{itemize}
+\end{frame}
+
+
+\section{Avaliação quantitativa}
+
+
+\begin{frame}
+	\frametitle{Objetivos}
+	As avaliações têm como objetivo determinar a performance e o percentual de perdas de notificações de eventos de interações com \smartobjs.
+
+	\bigskip
+
+	Serão feitos experimentos baseados em cenários de uso.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Experimento 1}
+	Se propõe a analisar a performance e o percentual de perdas de notificações de evntos de descobertas de \smartobjs.
+
+	\bigskip
+	
+	Métricas a serem utilizadas:
+	\begin{equation}
+		\label{equ:performance-discovery}
+		\Delta t_{descoberta} = t_{descoberta,app} - t_{descoberta,\stwopa}
+	\end{equation}
+	
+	\begin{equation}
+		\label{equ:acuracy}
+		P_{perda} = \frac{EventosGerados - EventosNotificados}{EventosGerados} \cdot 100
+	\end{equation}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Processo de medição}
+	\begin{figure}
+		\centering
+		\includegraphics[width=.85\linewidth]{img/performance-annotation.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Cenário}
+	Consiste em uma casa onde cada cômodo possui um \beacon \ble e o morador é instruido a conduzir suas atividades do dia a dia.
+
+	\bigskip
+	
+	O morador possui um \smartphone executando uma aplicação \mhubcddl, e cada vez que entra em um cômodo o \beacon será descoberto e um evento será gerado no \stwopa.
+
+	\bigskip
+	
+	Cada \beacon está configurado para emitir 10 anúncios por segundo.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Simulação da locomoção na residência}
+	Os dados utilizados para a simulação de locomoção de um indivíduo em uma residencia foram obtidos através de um \dataset disponibilizado em \cite{byrne:et-al:2018}.
+
+	\bigskip
+
+	Neste trabalho a locomoção de moradores em suas residências foi monitorada com o auxílio de câmeras e marcadores.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Frequência de entrada por cômodo}
+	\begin{figure}
+		\centering
+		\includegraphics[width=.80\linewidth]{img/dataset-histogram.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Simulação do \beacons}
+	Utilizando o \dataset já descrito, a cada momento em que o participante entra em determinado cômodo, calcula-se a quantidade de anúncios o \beacon daquele cômodo transmitirá durante o tempo de permanência no local, o cálculo é apresentado a seguir.
+	
+	\begin{equation}
+		anuncios = \frac{tempoPermanencia}{0.1} 
+	\end{equation}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Quantidade de eventos gerados}
+	\begin{table}
+		\centering
+		\begin{tabular}{lc}
+			\toprule
+						       & $EventosGerados$ \\
+			\midrule 
+			\textbf{Eventos de descoberta} & 34814            \\
+			\textbf{Eventos de conexão}    & 0                \\
+			\textbf{Eventos de desconexão} & 0                \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Resultados}
+	\newcommand{\nullval}{\textbf{---}}
+
+	\begin{table}[htb]
+		\begin{center}
+			\begin{tabular}{lccc}
+				\toprule
+							       & $EventosGerados$ & $EventosNotificados$ & $P_{perdas}$ (\%) \\
+				\midrule
+				\textbf{Eventos de descoberta} & 34814            & 34814                & 0		     \\
+				\textbf{Eventos de conexão}    & 0                & 0                    & \nullval	     \\
+				\textbf{Eventos de desconexão} & 0                & 0                    & \nullval          \\
+				\bottomrule
+			\end{tabular}
+		\end{center}
+	\end{table}
+
+	\bigskip
+
+	\begin{table}[htb]
+		\centering
+		\begin{adjustbox}{max width=\textwidth}
+			\begin{tabular}{lccccc}
+				\toprule
+									   & Média & Desvio padrão & Mínimo & Máximo & Intervalo de 95\% de confiança \\
+				\midrule
+				$\bm{\Delta t_{descoberta}}$ \textbf{(ms)} & 20.1  & 3.7           & 7.0 & 78.9 & 20.1 $\pm$ 0.03 	              \\
+				\bottomrule
+			\end{tabular}
+		\end{adjustbox}
+	\end{table}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Análise dos resultados}
+	Mesmo com os \beacons configurados para emitire \broadcast a cada 0.1 segundo, a solução conseguiu notificar a aplicação com tempos na casa de milissegundos. Este tempo pode ser considerado desprezível para aplicações reais.
+
+	\bigskip
+
+	Do ponto de vista de percentual de perdas, a pesar do grande número de eventos, não houve nehuma perda de notificação.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Experimento 2}
+	Se propõe a analisar a preformance e o percentual de perdas, mas levando em consideração eventos de conexão que não foram considerados no experiemento anterior.
+
+	\bigskip
+
+	Métricas a serem utilizadas:
+	
+	\begin{align}
+		\label{equ:performance-ready}
+		\Delta t_{conectado} &= t_{conexao,app} - t_{descoberta,\stwopa}
+	\end{align}
+	
+	\begin{equation}
+		P_{perda} = \frac{EventosGerados - EventosNotificados}{EventosGerados} \cdot 100
+	\end{equation}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Cenário}
+	Consiste em uma casa equipada com um sistema multimídia na sala de estar que possibilita que \smartphones se conectem a ele através de \bluetooth.
+
+	\bigskip
+
+	O sistema multimídia pode ter ciência de qual usuário está presente através dos \smartphones conectados no momento, pois ele armazena a relação dos moradores da residência com seus respectivos \smartphones.
+
+	\bigskip
+
+	Uma aplicação \android foi desenvolvida com o \middleware \mhubcddl que permanece ativamente procurando e se conectando ao sistema multimídia no ambiente.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Simulação do sistema multimídia}
+	Foi utilizado o mesmo \dataset do experimento anterior para simular uma pessoa se locomovendo em uma casa.
+
+	\bigskip
+
+	O sistema multimídia foi posicionado no cômodo \texttt{living\_area\_A}.
+
+	\bigskip
+
+	Ao entrar neste cômodo, ocorre um evento de descoberta seguido de um evento de conexão. Ao sair do cômodo um evento de desconexão é gerado.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Quantidade de evento gerados}
+	\begin{table}[htb]
+		\begin{center}
+			\begin{tabular}{lc}
+				\toprule
+							       & $EventosGerados$ \\
+				\midrule 
+				\textbf{Eventos de descoberta} & 37               \\
+				\textbf{Eventos de conexão}    & 37               \\
+				\textbf{Eventos de desconexão} & 37               \\
+				\bottomrule
+			\end{tabular}
+		\end{center}
+	\end{table}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Resultados}
+	\begin{table}[ht]
+		\centering
+		\begin{tabular}{lccc}
+			\toprule
+						       & $EventosGerados$ & $EventosNotificados$ & $P_{perdas}$ (\%) \\
+			\midrule
+			\textbf{Eventos de descoberta} & 37               & 37                   & 0		     \\
+			\textbf{Eventos de conexão}    & 37	          & 37                   & 0		     \\
+			\textbf{Eventos de desconexão} & 37	          & 37                   & 0	             \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+
+	\bigskip
+
+	\begin{table}[ht]
+		\centering
+		\begin{adjustbox}{max width=\textwidth}
+			\begin{tabular}{lccccc}
+				\toprule
+							  & Média & Desvio padrão & Mínimo & Máximo & Intervalo de 95\% de confiança \\
+				\midrule
+				$\bm{\Delta t_{conectado}}$ \textbf{(ms)} & 501.4 & 60.8         &425.1        & 654.5       &	501.4 $\pm$ 19.6	                  \\
+				\bottomrule
+			\end{tabular}
+		\end{adjustbox}
+	\end{table}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Análise dos resultados}
+	
+	Não foi possível observar perda de notificações neste experimento.
+
+	\bigskip
+	
+	O tempo entre a descoberta de um \smartobj no ambiente e sua conexão se manteve em torno de 500 milissegundos.
+
+	\bigskip
+
+	Isto implica que uma aplicação que necessite de dados oferecidos por sensores no ambiente, começaria a receber estes dados em média 0.5 segundo após o primeiro encontro com este dispositivo.
+
+	\bigskip
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Análise dos resultados}
+	Em um cenário onde uma aplicação necessita de dados de um sensor em um poste público, e assumindo que o raio do \smartobj é de 5 metros:
+
+	\[
+		\frac{10\si{\meter}}{0.5\si{\second}} = 20\si{m/s} = 72\si{km/h}
+	\]
+
+\end{frame}
+
+
+\section{Trabalhos futuros}
+
+
+\begin{frame}
+	\frametitle{Trabalhos futuros}
+	Como trabalhos futuros, prevê-se:
+	\begin{itemize}
+		\item novas avaliações que possam responder sobre a performance da solução ao utilizar um \broker em rede;
+
+		\item avaliar a capacidade de escalabilidade da solução.
+	\end{itemize}
+\end{frame}
+
+
 \section{Referências}
 
 \begin{frame}[allowframebreaks]
