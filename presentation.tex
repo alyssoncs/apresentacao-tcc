@@ -112,7 +112,7 @@
 
 		\item organiza as mensagens por meio de tópicos:
 			\begin{itemize}
-				\item funcionam como uma hieraquía de diretórios onde as mensagens são entregues.
+				\item funcionam como uma hierarquia de diretórios onde as mensagens são entregues.
 			\end{itemize}
 
 		\item os \pubs publicam mensagens em um tópico de um \broker;
@@ -132,8 +132,8 @@
 
 \begin{frame}
 	\frametitle{Tópicos \mqtt}
-	Ao publicar um dado no \broker \mqtt, o produtor de dados especifíca um tópico onde este dado será publicado.
-	O tópico pode possuir um ou mais níveis de hieraquía, com cada nível sendo separado por uma barra, como:
+	Ao publicar um dado no \broker \mqtt, o produtor de dados especifica um tópico onde este dado será publicado.
+	O tópico pode possuir um ou mais níveis de hierarquia, com cada nível sendo separado por uma barra, como:
 	\begin{itemize}
 		\item \texttt{thailand/humidity};
 		\item \texttt{thailand/bangkok/traffic}.
@@ -145,8 +145,8 @@
 	Também existe a conveniência da utilização de caracteres coringas para a assinatura de tópicos.
 	Os caracteres disponíveis são:
 	\begin{itemize}
-		\item ``\texttt{+}'': Substitui um nível na hierarquía;
-		\item ``\texttt{\#}'': Substitui todos os níveis subsequentes na hierarquía;
+		\item ``\texttt{+}'': Substitui um nível na hierarquia;
+		\item ``\texttt{\#}'': Substitui todos os níveis subsequentes na hierarquia;
 	\end{itemize}
 	
 	Como exemplo: o tópico ``\texttt{thailand/+/traffic}'' pode ser utilizado para receber os dados de tráfego de qualquer cidade da Tailândia~\cite{hunkeler:truong:stanford-clark:2008}.
@@ -220,7 +220,7 @@
 
 \begin{frame}
 	\frametitle{\sensordata}
-	Ao receber um evento de descoberta, conexão, desconexão ou leitura de dados, o \stwopa encapula esta informação em um objeto do tipo \sensordata, possuindo os seguintes atributos:
+	Ao receber um evento de descoberta, conexão, desconexão ou leitura de dados, o \stwopa encapsula esta informação em um objeto do tipo \sensordata, possuindo os seguintes atributos:
 	\begin{itemize}
 		\item \texttt{mouuid}
 
