@@ -22,7 +22,9 @@
 	\begin{itemize}
 		\item paradigma de comunicação onde os objetos do dia a dia são equipados com protocolos e equipamentos que permitem que se comuniquem com outros objetos e seus usuários \cite{atzori:iera:morabito:2010};
 
-		\item Os objetos em um cenário de \iot são denominados \smartobjs.
+			\bigskip
+
+		\item os objetos em um cenário de \iot são denominados \smartobjs.
 	\end{itemize}
 \end{frame}
 
@@ -37,8 +39,12 @@
 	\frametitle{\iomt}
 	\begin{itemize}
 		\item extensão da \iot;
+
+			\bigskip
 			
 		\item \smartobjs e \textbf{\gateways} são livres para se locomover;
+
+			\bigskip
 
 		\item maior dinamicidade de iterações.
 	\end{itemize}
@@ -50,9 +56,15 @@
 
 		\item {contexto};
 
+			\bigskip
+
 		\item {acesso à Internet e conectividade};
 
+			\bigskip
+
 		\item {disponibilidade de energia};
+
+			\bigskip
 
 		\item {segurança e privacidade}.
 
@@ -63,8 +75,12 @@
 	\frametitle{\mhubcddl}
 	\begin{itemize}
 		\item \middleware \iomt desenvolvido na plataforma \android para aquisição, processamento e distribuição de dados de contexto;
+
+			\bigskip
 			
 		\item amplo suporte para criação de aplicações de \iot cientes de contexto que possuam requisitos de qualidade de contexto \cite{gomes:et-al:2017};
+
+			\bigskip
 
 		\item desenvolvido em parceria da UFMA com a PUC-Rio.
 	\end{itemize}
@@ -79,6 +95,8 @@
 	\frametitle{Objetivos}
 	\begin{itemize}
 		\item implementar o mecanismo de notificação no \middleware \mhubcddl;
+
+			\bigskip
 
 		\item realizar análises de performance e percentual de perdas na solução proposta.
 	\end{itemize}
@@ -95,12 +113,16 @@
 	\begin{itemize}
 		\item protocolo baseado em mensagens seguindo o modelo \pubsub;
 
+			\bigskip
+
 		\item baseado em tópicos que são gerenciados por \brokers;
+
+			\bigskip
 
 		\item projetado para o uso em redes não confiáveis;
 
-		\item consistem em um servidor \broker e dois tipos de clientes: \pubs e \subs;
-			
+			\bigskip
+
 		\item protocolo padrão utilizado pelo \cddl para realizar troca de mensagens entre diferentes componentes.
 	\end{itemize}
 \end{frame}
@@ -111,9 +133,9 @@
 		\item intermedeia as mensagens enviadas pelos \pubs e recebidas pelos \subs;
 
 		\item organiza as mensagens por meio de tópicos:
-			\begin{itemize}
-				\item funcionam como uma hierarquia de diretórios onde as mensagens são entregues.
-			\end{itemize}
+		\begin{itemize}
+			\item funcionam como uma hierarquia de diretórios onde as mensagens são entregues.
+		\end{itemize}
 
 		\item os \pubs publicam mensagens em um tópico de um \broker;
 
@@ -171,8 +193,12 @@
 	\frametitle{\mhubcddl}
 	\begin{itemize}
 		\item composição de um \gateway (\mhub) e um \middleware de \iomt (\cddl);
+
+			\bigskip
 			
 		\item o \mhub transforma o dispositivo \android em um \gateway \iot móvel responsável pela descoberta e aquisição de dados diretamente dos \smartobjs
+
+			\bigskip
 			
 		\item o \cddl funciona como \middleware provendo serviços locais e remotos de descoberta de provedores de serviços, processamento de eventos complexos, publicação e assinatura de dados e eventos com qualidade de serviço.
 	\end{itemize}
@@ -200,8 +226,12 @@
 	\frametitle{\stwopa}
 	\begin{itemize}
 		\item protocolo que fornece uma \api comum para realizar a comunicação com diferentes tecnologias WPAN;
+
+			\bigskip
 			
 		\item implementado como um módulo na arquitetura do \middleware, define um conjunto de métodos e interfaces que os módulos responsáveis por determinada tecnologia de comunicação devem implementar;
+
+			\bigskip
 			
 		\item fornece uma \api unificada para todas as camadas superiores da arquitetura que precisam se comunicar com tais tecnologias.
 			
@@ -292,8 +322,12 @@
 \begin{frame}
 	\frametitle{Contexto}
 	Dado o fato que o \cddl somente envia à camada de aplicação dados referentes à leitura de dados, as seguintes implicações ocorrem no desenvolvimento de aplicações:
+
+	\bigskip
 	\begin{itemize}
 		\item incapacidade de gerenciar efetivamente recursos computacionais;
+
+			\bigskip
 
 		\item limitações no desenvolvimento de aplicações que não interagem com \smartobjs por meio de conexões.
 	\end{itemize}
